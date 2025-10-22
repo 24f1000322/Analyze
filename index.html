@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Performance Dashboard</title>
+    <!-- Bootstrap CSS from CDN for professional appearance and responsive design -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        /* Custom styles for better aesthetics and readability */
+        body {
+            padding-top: 20px;
+            background-color: #f8f9fa; /* Light grey background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 1200px; /* Max width for content */
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow for cards */
+            border-radius: 0.5rem; /* Slightly rounded corners */
+        }
+        .card-header {
+            background-color: #007bff; /* Bootstrap primary blue */
+            color: white;
+            font-weight: bold;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+        }
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px; /* Height for loading area */
+            margin-top: 50px;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        h1 {
+            color: #343a40; /* Dark grey heading */
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 0; /* Remove default margin */
+        }
+        th, td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-top: 1px solid #dee2e6; /* Light border for rows */
+        }
+        thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6; /* Thicker border for header */
+            font-weight: 600;
+            background-color: #e9ecef; /* Light background for header */
+        }
+        tbody tr:nth-of-type(odd) {
+            background-color: rgba(0,0,0,.03); /* Zebra stripping for rows */
+        }
+        tbody tr:hover {
+            background-color: rgba(0,123,255,.05); /* Subtle hover effect */
+        }
+        .card-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .card-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Global Sales Performance Dashboard</h1>
+
+        <!-- Loading spinner displayed until data is fetched -->
+        <div id="loading" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="ms-3 text-muted">Fetching sales data...</p>
+        </div>
+
+        <!-- Error message, hidden by default -->
+        <div id="error-message" class="alert alert-danger d-none" role="alert">
+            <h4 class="alert-heading">Data Loading Error!</h4>
+            <p>We encountered an issue while trying to fetch the sales data. Please ensure the <code class="alert-link">result.json</code> file is correctly published on GitHub Pages and try refreshing the page.</p>
+            <hr>
+            <p class="mb-0">If the problem persists, check the browser console for more details.</p>
+        </div>
+
+        <!-- Dashboard content, hidden by default and shown after data loads -->
+        <div id="dashboard-content" class="row d-none">
+            <!-- Card for Highest Sales Product Line -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-header">Top Performer</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Highest Sales Product Line</h5>
+                        <p class="card-text" id="highest-sales-product-line">Loading...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Card for Highest Revenue City -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card bg-success text-white">
+                    <div class="card-header">Top Location</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Highest Revenue City</h5>
+                        <p class="card-text" id="highest-revenue-city">Loading...</p>
+                    </div>
+                </div>
+            </div>
+             <!-- Empty column for layout spacing if only 2 top cards -->
+            <div class="col-lg-4 d-none d-lg-block"></div>
+
+            <!-- Card for Total Sales by Product Line Table -->
+            <div class="col-12 mt-4">
+                <div class="card">
+                    <div class="card-header">Total Sales by Product Line</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product Line</th>
+                                        <th>Total Sales ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="total-sales-by-product-line-table">
+                                    <!-- Data will be inserted here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card for Average Unit Price by Product Line Table -->
+            <div class="col-12 mt-4">
+                <div class="card">
+                    <div class="card-header">Average Unit Price by Product Line</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product Line</th>
+                                        <th>Average Unit Price ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="average-unit-price-by-product-line-table">
+                                    <!-- Data will be inserted here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card for Total Revenue by City Table -->
+            <div class="col-12 mt-4">
+                <div class="card">
+                    <div class="card-header">Total Revenue by City</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>City</th>
+                                        <th>Total Revenue ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="total-revenue-by-city-table">
+                                    <!-- Data will be inserted here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS with Popper.js for components like tooltips, modals etc. -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        // Ensure the DOM is fully loaded before running script
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingElement = document.getElementById('loading');
+            const errorMessageElement = document.getElementById('error-message');
+            const dashboardContentElement = document.getElementById('dashboard-content');
+
+            // Construct the URL for result.json.
+            // Assumes result.json is served from the same base URL as index.html on GitHub Pages.
+            const jsonUrl = './result.json';
+
+            /**
+             * Fetches the JSON data from the specified URL.
+             * Handles success and error states for display.
+             */
+            fetch(jsonUrl)
+                .then(response => {
+                    // Check if the network request was successful
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+                    }
+                    return response.json(); // Parse the JSON from the response
+                })
+                .then(data => {
+                    // On successful data load:
+                    loadingElement.classList.add('d-none'); // Hide loading spinner
+                    dashboardContentElement.classList.remove('d-none'); // Show dashboard content
+
+                    /**
+                     * Helper function to populate table rows from a dictionary.
+                     * @param {string} id - The ID of the tbody element.
+                     * @param {object} data - The dictionary containing key-value pairs to display.
+                     * @param {boolean} isCurrency - True if the value should be formatted as currency, false otherwise.
+                     */
+                    function populateTable(id, data, isCurrency = true) {
+                        const tbody = document.getElementById(id);
+                        tbody.innerHTML = ''; // Clear existing content
+
+                        // Sort data by value in descending order for better readability
+                        const sortedEntries = Object.entries(data).sort(([, a], [, b]) => b - a);
+
+                        sortedEntries.forEach(([key, value]) => {
+                            const row = tbody.insertRow();
+                            const cell1 = row.insertCell(0);
+                            const cell2 = row.insertCell(1);
+                            cell1.textContent = key;
+                            // Format value based on whether it's currency or a fixed-point number
+                            cell2.textContent = isCurrency
+                                ? value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+                                : value.toFixed(2); // Two decimal places for non-currency values like unit price
+                        });
+                    }
+
+                    // Populate the individual summary cards
+                    document.getElementById('highest-sales-product-line').textContent = data.highest_sales_product_line;
+                    document.getElementById('highest-revenue-city').textContent = data.highest_revenue_city;
+
+                    // Populate the detailed tables
+                    populateTable('total-sales-by-product-line-table', data.total_sales_by_product_line, true);
+                    populateTable('average-unit-price-by-product-line-table', data.average_unit_price_by_product_line, false);
+                    populateTable('total-revenue-by-city-table', data.total_revenue_by_city, true);
+                })
+                .catch(error => {
+                    // On error during fetch or JSON parsing:
+                    console.error('Error fetching or parsing sales data:', error);
+                    loadingElement.classList.add('d-none'); // Hide loading spinner
+                    errorMessageElement.classList.remove('d-none'); // Show error message
+                });
+        });
+    </script>
+</body>
+</html>
